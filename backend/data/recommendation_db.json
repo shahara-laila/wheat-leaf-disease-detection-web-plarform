@@ -1,0 +1,209 @@
+{
+  "Yellow_Rust": {
+    "common_names": [
+      "yellow rust",
+      "stripe rust",
+      "yellow stripe",
+      "yr"
+    ],
+    "symptoms": [
+      "yellow stripes",
+      "yellow pustules",
+      "parallel stripes",
+      "yellowing leaves"
+    ],
+    "recommendation": "Apply a triazole fungicide (propiconazole or tebuconazole) at first sign. Use resistant varieties, avoid excessive nitrogen, and remove volunteer plants that harbor the pathogen. Monitor during cool, moist weather."
+  },
+  "Brown_Rust": {
+    "common_names": [
+      "brown rust",
+      "leaf rust",
+      "orange rust",
+      "br"
+    ],
+    "symptoms": [
+      "brown pustules",
+      "orange spots",
+      "round brown spots",
+      "reddish-brown spots"
+    ],
+    "recommendation": "Spray a strobilurin or triazole fungicide (azoxystrobin, tebuconazole) when pustules appear. Plant rust-resistant cultivars, keep fertilization balanced, and rotate crops to break the disease cycle."
+  },
+  "Powdery_Mildew": {
+    "common_names": [
+      "powdery mildew",
+      "pm",
+      "mildew"
+    ],
+    "symptoms": [
+      "white powdery growth",
+      "white patches",
+      "grey-white fungal growth",
+      "powdery coating"
+    ],
+    "recommendation": "Apply a triazole or strobilurin fungicide at early infection. Avoid dense canopies and excess nitrogen, widen row spacing for airflow, and grow resistant cultivars."
+  },
+  "Septoria_Leaf_Blotch": {
+    "common_names": [
+      "septoria leaf blotch",
+      "septoria",
+      "slb",
+      "leaf blotch"
+    ],
+    "symptoms": [
+      "irregular brown lesions",
+      "black pycnidia",
+      "oval tan lesions",
+      "leaf blotches"
+    ],
+    "recommendation": "Apply an azole fungicide (prothioconazole) at flag-leaf emergence. Use resistant varieties, rotate away from wheat, bury infected residue, and avoid very early sowing."
+  },
+  "Tan_Spot": {
+    "common_names": [
+      "tan spot",
+      "ts",
+      "yellow leaf spot",
+      "red smudge"
+    ],
+    "symptoms": [
+      "tan lesions with yellow halo",
+      "lens-shaped lesions",
+      "dark brown centre",
+      "tan spots"
+    ],
+    "recommendation": "Rotate away from wheat for at least one season and bury or remove stubble, which carries the pathogen. Apply a fungicide at flag leaf if lesions reach the upper canopy, and choose tolerant cultivars."
+  },
+  "Head_Blight": {
+    "common_names": [
+      "head blight",
+      "fusarium head blight",
+      "scab",
+      "hb",
+      "ear blight"
+    ],
+    "symptoms": [
+      "bleached spikelets",
+      "pink spore masses",
+      "shrivelled kernels",
+      "premature whitening of heads"
+    ],
+    "recommendation": "Spray prothioconazole or tebuconazole at early anthesis (flowering). Avoid planting into maize stubble, rotate with non-cereals, and use moderately resistant varieties. Test grain for deoxynivalenol (DON) mycotoxin before use."
+  },
+  "Loose_Smut": {
+    "common_names": [
+      "loose smut",
+      "ls",
+      "smut"
+    ],
+    "symptoms": [
+      "black powdery spore mass",
+      "heads replaced by spores",
+      "destroyed heads",
+      "black dusty heads"
+    ],
+    "recommendation": "Systemic seed treatment is the only effective control: treat with carboxin or tebuconazole before sowing. Always plant certified disease-free seed; foliar sprays cannot cure a seed-borne infection."
+  },
+  "Karnal_Bunt": {
+    "common_names": [
+      "karnal bunt",
+      "kb",
+      "partial bunt"
+    ],
+    "symptoms": [
+      "blackened kernels",
+      "fishy odour",
+      "partially bunted grain",
+      "black powder in grain"
+    ],
+    "recommendation": "Sow certified seed treated with a systemic fungicide, and apply propiconazole at heading in high-risk seasons. Observe quarantine rules for movement of grain, and avoid irrigation during flowering in humid conditions."
+  },
+  "Root_Rot": {
+    "common_names": [
+      "root rot",
+      "rr",
+      "common root rot",
+      "crown rot"
+    ],
+    "symptoms": [
+      "brown roots",
+      "darkened crown",
+      "stunted growth",
+      "poor tillering",
+      "whiteheads"
+    ],
+    "recommendation": "Use a fungicidal seed treatment, rotate with non-host crops, and improve drainage to avoid waterlogging. Maintain balanced nutrition and avoid deep sowing, which prolongs seedling vulnerability."
+  },
+  "Leaf_Blight": {
+    "common_names": [
+      "leaf blight",
+      "lb",
+      "helminthosporium leaf blight",
+      "spot blotch"
+    ],
+    "symptoms": [
+      "brown oval lesions",
+      "blighted leaves",
+      "dark brown spots",
+      "drying leaf tips"
+    ],
+    "recommendation": "Apply mancozeb or propiconazole at first appearance. Rotate crops, destroy infected residue, use clean seed, and grow tolerant varieties; the disease is worst under warm, humid conditions."
+  },
+  "BYDV": {
+    "common_names": [
+      "bydv",
+      "barley yellow dwarf virus",
+      "barley yellow dwarf",
+      "yellow dwarf"
+    ],
+    "symptoms": [
+      "yellow leaf tips",
+      "red-purple leaf discolouration",
+      "stunting",
+      "reduced tillering"
+    ],
+    "recommendation": "No cure once plants are infected — control the aphid vector. Use insecticidal seed treatment, monitor and spray aphids in autumn, delay sowing to miss peak aphid flights, and grow tolerant varieties."
+  },
+  "WSBMV": {
+    "common_names": [
+      "wsbmv",
+      "wheat soilborne mosaic virus",
+      "soilborne mosaic",
+      "soil-borne mosaic"
+    ],
+    "symptoms": [
+      "mosaic mottling",
+      "yellow-green mottling",
+      "stunting",
+      "rosetting in patches"
+    ],
+    "recommendation": "Resistant varieties are the only practical control — the virus is spread by the soil fungus Polymyxa graminis and cannot be treated chemically. Avoid very early sowing and steer clear of poorly drained fields with a history of the disease."
+  },
+  "WSMV": {
+    "common_names": [
+      "wsmv",
+      "wheat streak mosaic virus",
+      "wheat streak mosaic",
+      "streak mosaic"
+    ],
+    "symptoms": [
+      "yellow streaking",
+      "parallel yellow streaks",
+      "mosaic pattern",
+      "stunting"
+    ],
+    "recommendation": "Destroy volunteer wheat at least two weeks before sowing to break the \"green bridge\" that carries the wheat curl mite vector. Delay planting, control grassy weeds, and use resistant varieties. No chemical cure exists once plants are infected."
+  },
+  "Healthy": {
+    "common_names": [
+      "healthy",
+      "no disease",
+      "normal"
+    ],
+    "symptoms": [
+      "green leaves",
+      "no spots",
+      "healthy leaf"
+    ],
+    "recommendation": "No disease detected. Maintain good agronomic practices: balanced irrigation and fertilization, regular field scouting, and preventive monitoring during humid periods."
+  }
+}

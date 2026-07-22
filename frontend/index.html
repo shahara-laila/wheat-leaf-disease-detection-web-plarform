@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wheat Leaf Disease Detection</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🌾</text></svg>">
+</head>
+<body>
+  <header>
+    <h1>Wheat Leaf Disease Detection</h1>
+    <p id="status-line" class="status" role="status" aria-live="polite">Connecting…</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Modes">
+    <button role="tab" id="tab-image" aria-controls="panel-image"
+            aria-selected="true" tabindex="0">Image</button>
+    <button role="tab" id="tab-symptom" aria-controls="panel-symptom"
+            aria-selected="false" tabindex="-1">Symptom</button>
+    <button role="tab" id="tab-browse" aria-controls="panel-browse"
+            aria-selected="false" tabindex="-1">Diseases</button>
+  </nav>
+
+  <main>
+    <!-- Image -->
+    <section role="tabpanel" id="panel-image" aria-labelledby="tab-image">
+      <div id="drop-zone" class="drop" tabindex="0" role="button">
+        <input type="file" id="file-input" accept="image/*" class="hidden">
+        <span>Drop a leaf photo, or click to choose</span>
+      </div>
+
+      <p id="image-error" class="error" role="alert" hidden></p>
+
+      <div id="preview-wrap" class="preview" hidden>
+        <img id="preview" alt="Selected leaf">
+        <button id="clear-btn" type="button" class="link">Clear</button>
+      </div>
+
+      <div id="predict-result" aria-live="polite"></div>
+
+      <p class="note">
+        Detects Brown Rust, Yellow Rust and Healthy only — it will label any image
+        as one of these three, even a photo that isn’t wheat.
+      </p>
+    </section>
+
+    <!-- Symptom -->
+    <section role="tabpanel" id="panel-symptom" aria-labelledby="tab-symptom" hidden>
+      <textarea id="symptom-input" rows="2"
+                placeholder="Describe a symptom, or name a disease"></textarea>
+      <div class="row">
+        <button id="symptom-btn" type="button" class="go">Search</button>
+        <button class="link example" type="button">yellow stripes</button>
+        <button class="link example" type="button">stunting</button>
+      </div>
+      <div id="symptom-result" aria-live="polite"></div>
+    </section>
+
+    <!-- Diseases -->
+    <section role="tabpanel" id="panel-browse" aria-labelledby="tab-browse" hidden>
+      <input type="search" id="browse-filter" placeholder="Search diseases">
+      <div id="browse-result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    Images are classified in memory and never stored.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

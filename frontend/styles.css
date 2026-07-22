@@ -1,0 +1,128 @@
+/* Wheat Leaf Disease Detection — deliberately plain.
+   One accent, hairline rules instead of boxes, no shadows. */
+
+:root {
+  --bg: #fff;
+  --text: #1a1a1a;
+  --muted: #757575;
+  --line: #e5e5e5;
+  --accent: #2f7d32;
+  --warn: #8a6d1f;
+  --error: #b3261e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161816; --text: #e9ebe9; --muted: #999e99;
+    --line: #2c302c; --accent: #7fbf7f; --warn: #d4b45c; --error: #f2a2a2;
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* Must come before any display rule: the `hidden` attribute is only display:none
+   in the UA stylesheet, so an author rule like `.preview { display: flex }` beats
+   it and the element stays visible. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0 auto;
+  max-width: 34rem;
+  padding: 2.5rem 1.25rem 4rem;
+  font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1 { margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; }
+.status { margin: .25rem 0 0; font-size: .8rem; color: var(--muted); }
+.status.bad { color: var(--error); }
+
+/* ── tabs ─────────────────────────────────────────────── */
+.tabs { display: flex; gap: 1.5rem; margin: 1.75rem 0 1.5rem;
+        border-bottom: 1px solid var(--line); }
+.tabs button {
+  font: inherit; background: none; border: 0; cursor: pointer;
+  color: var(--muted); padding: 0 0 .6rem; margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+}
+.tabs button:hover { color: var(--text); }
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── inputs ───────────────────────────────────────────── */
+textarea, input[type="search"] {
+  width: 100%; font: inherit; padding: .6rem .7rem; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+  resize: vertical;
+}
+.hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.row { display: flex; align-items: center; gap: 1rem; margin-top: .7rem; flex-wrap: wrap; }
+
+.go {
+  font: inherit; cursor: pointer; padding: .45rem 1.1rem; border-radius: 6px;
+  border: 0; background: var(--accent); color: #fff;
+}
+@media (prefers-color-scheme: dark) { .go { color: #10210f; } }
+.go:hover { opacity: .88; }
+
+.link {
+  font: inherit; font-size: .85rem; background: none; border: 0; padding: 0;
+  color: var(--muted); cursor: pointer; text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link:hover { color: var(--text); }
+
+/* ── image tab ────────────────────────────────────────── */
+.drop {
+  border: 1px dashed var(--line); border-radius: 6px;
+  padding: 2rem 1rem; text-align: center; cursor: pointer;
+  color: var(--muted); font-size: .9rem;
+}
+.drop:hover, .drop.dragging { border-color: var(--accent); color: var(--text); }
+.drop[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+
+.preview { display: flex; align-items: center; gap: .9rem; margin-top: .9rem; }
+.preview img {
+  width: 64px; height: 64px; object-fit: cover;
+  border-radius: 6px; border: 1px solid var(--line);
+}
+
+/* ── results ──────────────────────────────────────────── */
+.headline { margin: 1.5rem 0 .1rem; font-size: 1.1rem; font-weight: 600; }
+.sub { margin: 0 0 .9rem; font-size: .85rem; color: var(--muted); }
+
+/* Width AND a printed percentage — never colour or length alone. */
+.bar-row { display: grid; grid-template-columns: 6.5rem 1fr 3rem;
+           gap: .7rem; align-items: center; margin-top: .3rem; font-size: .85rem; }
+.bar-track { display: block; height: 4px; border-radius: 2px; background: var(--line); }
+.bar-fill { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+.bar-row:not(.top) .bar-fill { background: var(--muted); }
+.bar-row.top .bar-label { font-weight: 600; }
+.bar-value { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+.treatment { margin: 1rem 0 0; }
+
+/* One disease result / one catalogue entry. Hairline, not a card. */
+.entry { padding: 1.1rem 0; border-top: 1px solid var(--line); }
+.entry:first-of-type { border-top: 0; }
+.entry h3 { margin: 0; font-size: .98rem; font-weight: 600; }
+.entry .meta { margin: .15rem 0 .5rem; font-size: .82rem; color: var(--muted); }
+.entry p { margin: 0; }
+
+.tag { font-size: .72rem; color: var(--accent); font-weight: 600;
+       text-transform: uppercase; letter-spacing: .04em; margin-left: .4rem; }
+
+.count { margin: 1rem 0 0; font-size: .82rem; color: var(--muted); }
+.warn { margin: 1.25rem 0 0; font-size: .85rem; color: var(--warn); }
+.error { margin: .8rem 0 0; font-size: .85rem; color: var(--error); }
+.note { margin: 2rem 0 0; font-size: .8rem; line-height: 1.55; color: var(--muted); }
+
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line);
+         font-size: .78rem; color: var(--muted); }
+
+@media (max-width: 420px) {
+  .bar-row { grid-template-columns: 5.5rem 1fr 2.6rem; }
+}

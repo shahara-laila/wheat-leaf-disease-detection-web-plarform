@@ -4,69 +4,37 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Wheat Leaf Disease Detection</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🌾</text></svg>">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Wheat Leaf Disease Detection</h1>
-    <p id="status-line" class="status" role="status" aria-live="polite">Connecting…</p>
-  </header>
 
-  <nav class="tabs" role="tablist" aria-label="Modes">
-    <button role="tab" id="tab-image" aria-controls="panel-image"
-            aria-selected="true" tabindex="0">Image</button>
-    <button role="tab" id="tab-symptom" aria-controls="panel-symptom"
-            aria-selected="false" tabindex="-1">Symptom</button>
-    <button role="tab" id="tab-browse" aria-controls="panel-browse"
-            aria-selected="false" tabindex="-1">Diseases</button>
-  </nav>
+  <h1>Wheat Leaf Disease Detection</h1>
+  <p id="status">Connecting to the server...</p>
 
-  <main>
-    <!-- Image -->
-    <section role="tabpanel" id="panel-image" aria-labelledby="tab-image">
-      <div id="drop-zone" class="drop" tabindex="0" role="button">
-        <input type="file" id="file-input" accept="image/*" class="hidden">
-        <span>Drop a leaf photo, or click to choose</span>
-      </div>
+  <section>
+    <h2>1. Check a leaf photo</h2>
+    <input type="file" id="file-input" accept="image/*">
+    <img id="preview" alt="Selected leaf" hidden>
+    <div id="predict-result"></div>
+    <p class="note">
+      The model was trained on Brown Rust, Yellow Rust and Healthy leaves only,
+      so it labels every photo as one of those three.
+    </p>
+  </section>
 
-      <p id="image-error" class="error" role="alert" hidden></p>
+  <section>
+    <h2>2. Search by symptom</h2>
+    <input type="text" id="symptom-input" placeholder="e.g. yellow stripes on the leaves">
+    <button id="search-button">Search</button>
+    <div id="symptom-result"></div>
+  </section>
 
-      <div id="preview-wrap" class="preview" hidden>
-        <img id="preview" alt="Selected leaf">
-        <button id="clear-btn" type="button" class="link">Clear</button>
-      </div>
+  <section>
+    <h2>3. All diseases</h2>
+    <div id="disease-list"></div>
+  </section>
 
-      <div id="predict-result" aria-live="polite"></div>
-
-      <p class="note">
-        Detects Brown Rust, Yellow Rust and Healthy only — it will label any image
-        as one of these three, even a photo that isn’t wheat.
-      </p>
-    </section>
-
-    <!-- Symptom -->
-    <section role="tabpanel" id="panel-symptom" aria-labelledby="tab-symptom" hidden>
-      <textarea id="symptom-input" rows="2"
-                placeholder="Describe a symptom, or name a disease"></textarea>
-      <div class="row">
-        <button id="symptom-btn" type="button" class="go">Search</button>
-        <button class="link example" type="button">yellow stripes</button>
-        <button class="link example" type="button">stunting</button>
-      </div>
-      <div id="symptom-result" aria-live="polite"></div>
-    </section>
-
-    <!-- Diseases -->
-    <section role="tabpanel" id="panel-browse" aria-labelledby="tab-browse" hidden>
-      <input type="search" id="browse-filter" placeholder="Search diseases">
-      <div id="browse-result" aria-live="polite"></div>
-    </section>
-  </main>
-
-  <footer>
-    Images are classified in memory and never stored.
-  </footer>
+  <footer>Photos are checked in memory and never stored on the server.</footer>
 
   <script src="app.js"></script>
 </body>

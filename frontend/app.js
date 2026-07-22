@@ -1,274 +1,132 @@
-/* Wheat Leaf Disease Detection — frontend. No framework, no build step. */
-"use strict";
+// Web page for the wheat disease API. Plain JavaScript, no build step.
 
-var MAX_BYTES = 10 * 1024 * 1024;
-var $ = function (id) { return document.getElementById(id); };
+const $ = (id) => document.getElementById(id);
+const pretty = (name) => name.replace(/_/g, " ");
+const percent = (value) => (value * 100).toFixed(1) + "%";
 
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, function (c) {
-    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-  });
-}
-function pretty(n) { return String(n).replace(/_/g, " "); }
+// --- server status ---------------------------------------------------------
 
-/** Read an error body that may be JSON or plain text, and never throw. */
-function errorText(res) {
-  return res.text().then(function (body) {
-    try {
-      var j = JSON.parse(body);
-      return j.detail ? j.error + " — " + j.detail : (j.error || body);
-    } catch (e) { return body || res.status + " " + res.statusText; }
-  });
+async function showStatus() {
+  try {
+    const response = await fetch("/health");
+    const health = await response.json();
+    $("status").textContent = health.model_loaded
+      ? `Ready. ${health.disease_count} diseases in the database.`
+      : "Photo checking is off (model not loaded). Symptom search still works.";
+  } catch (error) {
+    $("status").textContent = "Cannot reach the server.";
+  }
 }
 
-/* ── tabs ─────────────────────────────────────────────── */
-var tabs = [$("tab-image"), $("tab-symptom"), $("tab-browse")];
+// --- 1. photo --------------------------------------------------------------
 
-function selectTab(i) {
-  tabs.forEach(function (t, j) {
-    var on = i === j;
-    t.setAttribute("aria-selected", String(on));
-    t.tabIndex = on ? 0 : -1;
-    $(t.getAttribute("aria-controls")).hidden = !on;
-  });
-  if (i === 2) loadDiseases();
-}
-
-tabs.forEach(function (tab, i) {
-  tab.addEventListener("click", function () { selectTab(i); });
-  tab.addEventListener("keydown", function (e) {
-    var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-    if (!d) return;
-    e.preventDefault();
-    var n = (i + d + tabs.length) % tabs.length;
-    selectTab(n);
-    tabs[n].focus();
-  });
-});
-
-/* ── health ───────────────────────────────────────────── */
-var modelReady = false;
-
-fetch("/health")
-  .then(function (r) { return r.json(); })
-  .then(function (h) {
-    modelReady = h.model_loaded;
-    var line = $("status-line");
-    if (modelReady) {
-      line.textContent = h.kb_entries + " diseases · model ready";
-    } else {
-      line.textContent = "Image detection unavailable — " + (h.model_error || "model not loaded");
-      line.className = "status bad";
-      var z = $("drop-zone");
-      z.setAttribute("aria-disabled", "true");
-      z.tabIndex = -1;
-      $("predict-result").innerHTML =
-        '<p class="warn">The model is not loaded. Symptom search and the disease ' +
-        "list still work.</p>";
-    }
-  })
-  .catch(function () {
-    var line = $("status-line");
-    line.textContent = "Cannot reach the API — is the server running?";
-    line.className = "status bad";
-  });
-
-/* ── image ────────────────────────────────────────────── */
-var dropZone = $("drop-zone");
-var fileInput = $("file-input");
-var previewWrap = $("preview-wrap");
-var previewImg = $("preview");
-var imageError = $("image-error");
-var objectUrl = null;
-
-function showError(msg) { imageError.textContent = msg; imageError.hidden = false; }
-function clearError() { imageError.hidden = true; }
-
-function resetPreview() {
-  // Revoking is the visible counterpart of the no-persistence policy.
-  if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
-  previewWrap.hidden = true;
-  previewImg.removeAttribute("src");
-}
-
-$("clear-btn").addEventListener("click", function () {
-  resetPreview();
-  fileInput.value = "";
-  $("predict-result").innerHTML = "";
-  clearError();
-});
-
-function handleFile(file) {
-  clearError();
+$("file-input").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
   if (!file) return;
-  if (!modelReady) { showError("The model is not loaded on the server."); return; }
-  // Fail fast rather than spending a round trip.
-  if (file.type && file.type.indexOf("image/") !== 0) {
-    showError("That is not an image file."); return;
-  }
-  if (file.size > MAX_BYTES) {
-    showError("Image is " + (file.size / 1048576).toFixed(1) + " MB; the limit is 10 MB."); return;
-  }
-  resetPreview();
-  objectUrl = URL.createObjectURL(file);
-  previewImg.src = objectUrl;
-  previewWrap.hidden = false;
-  classify(file);
-}
 
-function classify(file) {
-  var out = $("predict-result");
-  out.innerHTML = '<p class="sub">Classifying…</p>';
-  var form = new FormData();
+  $("preview").src = URL.createObjectURL(file);
+  $("preview").hidden = false;
+  $("predict-result").textContent = "Checking...";
+
+  const form = new FormData();
   form.append("image", file);
 
-  fetch("/predict", { method: "POST", body: form })
-    .then(function (res) {
-      if (!res.ok) return errorText(res).then(function (m) { throw new Error(m); });
-      return res.json();
-    })
-    .then(render)
-    .catch(function (err) {
-      out.innerHTML = '<p class="error">' + esc(err.message) + "</p>";
-    });
+  try {
+    const response = await fetch("/predict", { method: "POST", body: form });
+    const data = await response.json();
+    if (!response.ok) {
+      // FastAPI puts the error message in "detail".
+      $("predict-result").textContent = data.detail;
+      return;
+    }
+    showPrediction(data);
+  } catch (error) {
+    $("predict-result").textContent = "Cannot reach the server.";
+  }
+});
 
-  function render(d) {
-    var names = Object.keys(d.probabilities).sort(function (a, b) {
-      return d.probabilities[b] - d.probabilities[a];
-    });
-    var bars = names.map(function (n) {
-      var pct = d.probabilities[n] * 100;
-      return (
-        '<div class="bar-row' + (n === d.prediction ? " top" : "") +
-          '" role="img" aria-label="' + esc(pretty(n)) + " " + pct.toFixed(1) + ' percent">' +
-          '<span class="bar-label">' + esc(pretty(n)) + "</span>" +
-          '<span class="bar-track"><span class="bar-fill" style="width:' + pct.toFixed(1) + '%"></span></span>' +
-          '<span class="bar-value">' + pct.toFixed(0) + "%</span>" +
-        "</div>"
-      );
-    }).join("");
+function showPrediction(data) {
+  const bars = Object.entries(data.probabilities)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, value]) => `
+      <div class="bar">
+        <span>${pretty(name)}</span>
+        <progress value="${value}" max="1"></progress>
+        <span>${percent(value)}</span>
+      </div>`)
+    .join("");
 
-    out.innerHTML =
-      '<p class="headline">' + esc(pretty(d.prediction)) + "</p>" +
-      '<p class="sub">' + (d.confidence * 100).toFixed(1) + "% confidence" +
-        (d.uncertain ? " · low" : "") + "</p>" +
-      bars +
-      (d.uncertain ? '<p class="warn">' + esc(d.message || "") + "</p>" : "") +
-      '<p class="treatment">' + esc(d.recommendation) + "</p>";
+  const warning = data.uncertain
+    ? "<p class='warning'>Low confidence. Try a clearer photo of a single leaf.</p>"
+    : "";
+
+  $("predict-result").innerHTML = `
+    <h3>${pretty(data.prediction)}</h3>
+    <p>${percent(data.confidence)} confident</p>
+    ${bars}
+    ${warning}
+    <p>${data.recommendation}</p>`;
+}
+
+// --- 2. symptom search -----------------------------------------------------
+
+$("search-button").addEventListener("click", search);
+$("symptom-input").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") search();
+});
+
+async function search() {
+  const text = $("symptom-input").value.trim();
+  if (!text) return;
+
+  $("symptom-result").textContent = "Searching...";
+
+  try {
+    const response = await fetch("/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text }),
+    });
+    const data = await response.json();
+
+    if (data.matches.length === 0) {
+      $("symptom-result").textContent =
+        "No disease matched. Try describing the symptom differently.";
+      return;
+    }
+
+    $("symptom-result").innerHTML = data.matches
+      .map((match) => `
+        <div class="entry">
+          <h3>${pretty(match.disease)}</h3>
+          <p class="matched">matched: ${match.matched_terms.join(", ")}</p>
+          <p>${match.recommendation}</p>
+        </div>`)
+      .join("");
+  } catch (error) {
+    $("symptom-result").textContent = "Cannot reach the server.";
   }
 }
 
-dropZone.addEventListener("click", function () { if (modelReady) fileInput.click(); });
-dropZone.addEventListener("keydown", function (e) {
-  if ((e.key === "Enter" || e.key === " ") && modelReady) { e.preventDefault(); fileInput.click(); }
-});
-fileInput.addEventListener("change", function () { handleFile(fileInput.files[0]); });
+// --- 3. disease list -------------------------------------------------------
 
-["dragenter", "dragover"].forEach(function (ev) {
-  dropZone.addEventListener(ev, function (e) { e.preventDefault(); dropZone.classList.add("dragging"); });
-});
-["dragleave", "drop"].forEach(function (ev) {
-  dropZone.addEventListener(ev, function (e) { e.preventDefault(); dropZone.classList.remove("dragging"); });
-});
-dropZone.addEventListener("drop", function (e) {
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
+async function showDiseases() {
+  try {
+    const response = await fetch("/diseases");
+    const diseases = await response.json();
 
-/* ── symptom ──────────────────────────────────────────── */
-var symptomInput = $("symptom-input");
-
-Array.prototype.forEach.call(document.querySelectorAll(".example"), function (b) {
-  b.addEventListener("click", function () { symptomInput.value = b.textContent; search(); });
-});
-$("symptom-btn").addEventListener("click", search);
-symptomInput.addEventListener("keydown", function (e) {
-  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) search();
-});
-
-function search() {
-  var text = symptomInput.value.trim();
-  var out = $("symptom-result");
-  if (!text) { out.innerHTML = '<p class="sub">Type a symptom first.</p>'; return; }
-  out.innerHTML = '<p class="sub">Searching…</p>';
-
-  fetch("/recommend", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: text })
-  })
-    .then(function (res) {
-      if (!res.ok) return errorText(res).then(function (m) { throw new Error(m); });
-      return res.json();
-    })
-    .then(function (d) {
-      if (!d.diseases.length) { out.innerHTML = '<p class="count">' + esc(d.message) + "</p>"; return; }
-      // Shared symptoms mean candidates, not a diagnosis. Say so.
-      var warn = d.ambiguous
-        ? '<p class="warn">' + d.diseases.length +
-          " diseases share this symptom — add detail to narrow it down.</p>"
-        : "";
-      out.innerHTML = warn + d.recommendations.map(function (r) {
-        return (
-          '<div class="entry">' +
-            "<h3>" + esc(pretty(r.disease)) + "</h3>" +
-            '<p class="meta">matched: ' + esc(r.matched_terms.join(", ")) + "</p>" +
-            "<p>" + esc(r.recommendation) + "</p>" +
-          "</div>"
-        );
-      }).join("");
-    })
-    .catch(function (err) {
-      out.innerHTML = '<p class="error">' + esc(err.message) + "</p>";
-    });
+    $("disease-list").innerHTML = Object.entries(diseases)
+      .map(([name, info]) => `
+        <div class="entry">
+          <h3>${pretty(name)}</h3>
+          <p class="matched">symptoms: ${info.symptoms.join(", ")}</p>
+          <p>${info.recommendation}</p>
+        </div>`)
+      .join("");
+  } catch (error) {
+    $("disease-list").textContent = "Could not load the disease list.";
+  }
 }
 
-/* ── diseases ─────────────────────────────────────────── */
-var cache = null;
-
-function loadDiseases() {
-  if (cache) return;
-  var out = $("browse-result");
-  out.innerHTML = '<p class="sub">Loading…</p>';
-
-  fetch("/diseases")
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      cache = Object.keys(data.diseases).map(function (name) {
-        var d = data.diseases[name];
-        return {
-          name: name,
-          photo: d.detectable_by_image,
-          common: d.common_names,
-          symptoms: d.symptoms,
-          rec: d.recommendation,
-          hay: (name + " " + d.common_names.join(" ") + " " + d.symptoms.join(" ")).toLowerCase()
-        };
-      });
-      renderList("");
-    })
-    .catch(function () { out.innerHTML = '<p class="error">Could not load diseases.</p>'; });
-}
-
-function renderList(q) {
-  var query = q.trim().toLowerCase();
-  var hits = cache.filter(function (d) { return !query || d.hay.indexOf(query) !== -1; });
-
-  $("browse-result").innerHTML =
-    '<p class="count">' + hits.length + " of " + cache.length + " diseases</p>" +
-    (hits.length
-      ? hits.map(function (d) {
-          return (
-            '<div class="entry">' +
-              "<h3>" + esc(pretty(d.name)) +
-                (d.photo ? '<span class="tag">photo</span>' : "") + "</h3>" +
-              '<p class="meta">' + esc(d.symptoms.join(", ")) + "</p>" +
-              "<p>" + esc(d.rec) + "</p>" +
-            "</div>"
-          );
-        }).join("")
-      : "");
-}
-
-$("browse-filter").addEventListener("input", function (e) {
-  if (cache) renderList(e.target.value);
-});
+showStatus();
+showDiseases();

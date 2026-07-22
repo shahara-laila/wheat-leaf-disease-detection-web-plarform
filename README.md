@@ -1,112 +1,62 @@
-# Wheat Leaf Disease Detection — Web Application
+# Wheat Leaf Disease Detection
 
-FastAPI backend + vanilla HTML/CSS/JS frontend implementing **Step 6 (web integration)**
-and **Step 7 (privacy)** of Abbasi et al. (2026), *Food Science & Nutrition*.
+A small web application with two parts:
 
-Two independent capabilities, exactly as the paper describes:
+1. **Photo check** - a trained CNN classifies a wheat leaf photo as
+   Brown Rust, Yellow Rust or Healthy.
+2. **Symptom search** - typed symptoms are matched against a list of
+   13 diseases plus Healthy, each with a treatment recommendation.
 
-| | Covers | Powered by |
-|---|---|---|
-| **Image detection** | Brown Rust · Healthy · Yellow Rust | 6-conv CNN, val accuracy **0.9891** |
-| **Symptom → treatment** | 13 diseases + Healthy | Regex knowledge base, no model needed |
+The second part does not use the model, so it works on its own.
 
-The knowledge base is deliberately broader than the classifier. The paper's Section 3.3
-lists 13 diseases for the recommendation module while the CNN only distinguishes 3, so
-the Browse tab badges the three that are "detectable by photo".
+## Files
 
-## Setup
+| File | What it does |
+|---|---|
+| `app.py` | The whole backend: four endpoints and the model loading. |
+| `diseases.json` | The disease knowledge base (names, symptoms, treatment). |
+| `frontend/index.html` | The page. |
+| `frontend/app.js` | Calls the endpoints and shows the results. |
+| `frontend/style.css` | Styling. |
 
-TensorFlow has **no Python 3.14 wheels**. Build the venv with 3.13 explicitly — using the
-default `python3` will fail to resolve.
+The trained model `wheat_disease_cnn.keras` (26 MB) is not in the repository.
+Copy it into the project folder before running. Without it the app still
+starts and the symptom search works.
+
+## Run it
 
 ```bash
-cd neural-web-project
-/opt/homebrew/bin/python3.13 -m venv venv
-./venv/bin/pip install -r requirements.txt
-./run.sh
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app:app --reload
 ```
 
-Open <http://localhost:8000>. Interactive API docs at <http://localhost:8000/docs>.
+Then open <http://localhost:8000>.
+Automatic API documentation is at <http://localhost:8000/docs>.
 
-`wheat_disease_cnn.keras` must sit in the project root (or set `WHEAT_MODEL_PATH`). It is
-gitignored — 26 MB does not belong in version control.
+TensorFlow needs Python 3.9-3.13. It has no wheels for Python 3.14 yet.
 
 ## Endpoints
 
-| Method | Path | Purpose |
+| Method | Path | What it returns |
 |---|---|---|
-| GET | `/health` | Liveness + model status. Always 200, `status` is `ok` or `degraded`. |
-| GET | `/diseases` | All 14 knowledge-base entries. |
-| POST | `/predict` | multipart, field `image` → class, confidence, per-class probabilities, treatment. |
-| POST | `/recommend` | JSON `{"text": "..."}` → matching diseases with treatments. |
+| GET | `/health` | Whether the model loaded and how many diseases are known. |
+| GET | `/diseases` | The whole knowledge base. |
+| POST | `/predict` | Send an image in the `image` field, get the class, confidence, all three probabilities and the treatment. |
+| POST | `/recommend` | Send `{"text": "..."}`, get every matching disease with its treatment. |
 
-```bash
-curl -s localhost:8000/health | python3 -m json.tool
-curl -s -F image=@leaf.jpg localhost:8000/predict | python3 -m json.tool
-curl -s -X POST localhost:8000/recommend \
-  -H 'Content-Type: application/json' -d '{"text":"yellow stripes on the leaves"}'
-```
+## How the prediction works
 
-Errors: `400` missing image field · `413` over 10 MB · `422` undecodable image or text over
-2000 chars · `503` model not loaded.
+The uploaded photo goes through the same steps used during training:
+convert to RGB, resize to 256x256, scale the pixel values to 0-1, then
+wrap it in a batch of one. The model returns three probabilities and the
+highest one is the answer. Below 70% the result is marked uncertain.
 
-## Design notes
+The photo is kept in memory only and is never written to disk.
 
-**Graceful degradation.** A missing knowledge base is fatal (it ships in the repo, so a
-broken one means a broken deploy). A missing model is *not* — the app still starts, `/health`
-reports `degraded`, `/predict` returns a clean 503, and the Symptom and Browse tabs keep
-working. The frontend disables the upload control and explains why. The original Flask
-version loaded the model at import and took the whole process down instead.
+## Limitation
 
-**Model loading.** Once, in the FastAPI lifespan handler, with a warmup inference so no user
-request pays the graph-tracing cost. Inference is serialized behind a lock (a single Keras
-model is not safe under concurrent `predict`) and dispatched to a threadpool so it never
-blocks the event loop.
-
-**Preprocessing is frozen.** `RGB → resize → /255 → batch`, matching the notebook exactly.
-Verified numerically identical: the API and the notebook produce bit-for-bit the same
-probabilities (max delta `0.00e+00`). Any change here silently degrades accuracy without
-raising, so re-run that comparison if you touch `inference.py`.
-
-## Two deliberate deviations from the notebook
-
-**1. Shared symptoms return every candidate.** The notebook indexed `term → disease` in a
-plain dict, so a term claimed by several diseases kept only the last. `'stunting'` belongs to
-BYDV, WSBMV *and* WSMV, but only WSMV survived. The index is now `term → [diseases]`, and the
-UI flags the result as ambiguous rather than implying a diagnosis.
-
-**2. Short acronyms must be uppercase.** The knowledge base contains the paper's acronyms
-(`yr`, `br`, `pm`, `slb`, `ts`, `hb`, `ls`, `kb`, `rr`, `lb`). Matched case-insensitively they
-fire on ordinary prose — *"we applied 50 lb of seed"* read as Leaf Blight. Terms of 3
-characters or fewer now require uppercase in the original text, so `YR` matches and `50 lb`
-does not.
-
-## Known limitation: no out-of-distribution rejection
-
-The model returns a confident answer for **any** image. Feeding it pure random noise yields
-`Healthy` at **100.0%** confidence — the `uncertain` flag does not fire, because softmax
-confidence is uncalibrated off-distribution.
-
-The `CONFIDENCE_THRESHOLD` catches genuinely *ambiguous wheat photos*. It is **not** a
-"is this a wheat leaf?" detector and must not be presented as one. That is why the UI carries
-a permanent caveat instead of relying on the threshold. Real fixes, in ascending cost:
-temperature scaling on the val set → an energy/Mahalanobis OOD score → a fourth
-"not a wheat leaf" training class.
-
-## Privacy (paper Step 7)
-
-Enforced in two places, both marked in the source:
-
-- **Images are never persisted.** `/predict` holds the upload in a local `bytes` — no
-  `UploadFile.save`, no temp file, no disk write. It goes out of scope when the handler
-  returns. The frontend revokes its object URL on clear/replace.
-- **Query text is never logged.** `/predict` logs the class only; `/recommend` logs a match
-  count only.
-
-Verified: file count unchanged across requests, and a unique marker string in a query never
-appeared in the log.
-
-Before any public deployment, add authentication, rate limiting, and HTTPS, and tighten
-`ALLOWED_ORIGINS`. `--reload` is dev-only (it reloads the 26 MB model on every save), and the
-server should stay at **one worker** — each additional worker loads its own model and full TF
-runtime for no throughput gain, since inference is already serialized.
+The model only knows three classes, so it gives a confident answer for any
+image, including photos that are not wheat leaves. The confidence value
+tells you how sure the model is between those three classes, nothing more.

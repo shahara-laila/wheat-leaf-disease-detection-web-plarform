@@ -1,0 +1,91 @@
+body {
+  max-width: 46rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  color: #222;
+}
+
+h1 {
+  margin-bottom: 0.25rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+h3 {
+  margin: 0 0 0.25rem;
+}
+
+section {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+#status {
+  color: #555;
+  margin-top: 0;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: #2e7d32;
+  color: white;
+  cursor: pointer;
+}
+
+#preview {
+  display: block;
+  max-width: 260px;
+  margin: 1rem 0;
+  border-radius: 4px;
+}
+
+/* One row per class: label, filled bar, percentage. */
+.bar {
+  display: grid;
+  grid-template-columns: 8rem 1fr 3rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+progress {
+  width: 100%;
+}
+
+.entry {
+  border-top: 1px solid #eee;
+  padding: 0.75rem 0;
+}
+
+.matched {
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0 0 0.25rem;
+}
+
+.warning {
+  color: #b26a00;
+}
+
+.note,
+footer {
+  color: #666;
+  font-size: 0.9rem;
+}

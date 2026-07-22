@@ -1,10 +1,6 @@
-# Verified working on Python 3.13.14 (macOS/arm64).
-# NOTE: TensorFlow has no Python 3.14 wheels — build the venv with python3.13.
-tensorflow>=2.21,<3
-numpy>=2.5,<3
-pillow>=12,<13
-
-fastapi>=0.115
-uvicorn[standard]>=0.32
-python-multipart>=0.0.9   # required for multipart /predict uploads
-pydantic>=2.9
+fastapi
+uvicorn
+python-multipart
+pillow
+numpy
+tensorflow

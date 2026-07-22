@@ -2,3 +2,7 @@ venv/
 __pycache__/
 *.py[cod]
 .DS_Store
+
+# Dataset and the 70:30 split the notebook writes from it
+archive/
+data_70_30/

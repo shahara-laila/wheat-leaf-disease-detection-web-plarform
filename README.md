@@ -19,9 +19,9 @@ The second part does not use the model, so it works on its own.
 | `frontend/app.js` | Calls the endpoints and shows the results. |
 | `frontend/style.css` | Styling. |
 
-The trained model `wheat_disease_cnn.keras` (26 MB) is not in the repository.
-Copy it into the project folder before running. Without it the app still
-starts and the symptom search works.
+The trained model is `wheat_disease_cnn.keras` (26 MB) in the same folder.
+If it is missing the app still starts and the symptom search still works,
+only the photo check is turned off.
 
 ## Run it
 

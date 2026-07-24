@@ -26,7 +26,7 @@ $("file-input").addEventListener("change", async (event) => {
 
   $("preview").src = URL.createObjectURL(file);
   $("preview").hidden = false;
-  $("predict-result").textContent = "Checking...";
+  $("predict-result").innerHTML = '<p class="loading"><span class="spinner"></span>Checking...</p>';
 
   const form = new FormData();
   form.append("image", file);
@@ -56,13 +56,24 @@ function showPrediction(data) {
       </div>`)
     .join("");
 
+  // Green when the leaf is healthy, amber when a disease is found. A low-confidence
+  // answer is always amber, whatever the class.
+  const healthy = data.prediction === "Healthy" && !data.uncertain;
+  const colour = healthy ? "good" : "alert";
+
   const warning = data.uncertain
-    ? "<p class='warning'>Low confidence. Try a clearer photo of a single leaf.</p>"
+    ? `<p class="warning">
+         Low confidence. The model only knows three diseases and still answers
+         confidently on photos unlike its training images, so treat this result
+         with care. Try a close-up of a single leaf.
+       </p>`
     : "";
 
   $("predict-result").innerHTML = `
-    <h3>${pretty(data.prediction)}</h3>
-    <p>${percent(data.confidence)} confident</p>
+    <div class="result ${colour}">
+      <h3>${pretty(data.prediction)}</h3>
+      <p class="confidence">${percent(data.confidence)} confident</p>
+    </div>
     ${bars}
     ${warning}
     <p>${data.recommendation}</p>`;

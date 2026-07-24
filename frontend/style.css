@@ -80,8 +80,55 @@ progress {
   margin: 0 0 0.25rem;
 }
 
+/* Result box, coloured by outcome. */
+.result {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+.result h3 {
+  font-size: 1.4rem;
+}
+.result .confidence {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.result.good {
+  background: #e6f4ea;
+  border-left: 5px solid #2e7d32;   /* green: healthy */
+}
+.result.alert {
+  background: #fdeee0;
+  border-left: 5px solid #b26a00;   /* amber: disease or unsure */
+}
+
+/* Spinner shown while a photo is being classified. */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #555;
+}
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #ccc;
+  border-top-color: #2e7d32;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Low-confidence warning: a visible banner, not just coloured text. */
 .warning {
-  color: #b26a00;
+  background: #fff8e1;
+  border: 1px solid #f0c36d;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  color: #8a5a00;
+  font-size: 0.9rem;
 }
 
 .note,

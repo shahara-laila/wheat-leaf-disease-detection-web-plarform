@@ -20,9 +20,13 @@ async function showStatus() {
 
 // --- 1. photo --------------------------------------------------------------
 
-$("file-input").addEventListener("change", async (event) => {
-  const file = event.target.files[0];
+// Both the file button and the drop zone end up calling this one function.
+async function classifyPhoto(file) {
   if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    $("predict-result").textContent = "Please choose an image file.";
+    return;
+  }
 
   $("preview").src = URL.createObjectURL(file);
   $("preview").hidden = false;
@@ -43,6 +47,25 @@ $("file-input").addEventListener("change", async (event) => {
   } catch (error) {
     $("predict-result").textContent = "Cannot reach the server.";
   }
+}
+
+// The file button.
+$("file-input").addEventListener("change", (event) => {
+  classifyPhoto(event.target.files[0]);
+});
+
+// Drag-and-drop onto the drop zone. Clicking it also opens the file picker.
+const dropZone = $("drop-zone");
+dropZone.addEventListener("click", () => $("file-input").click());
+dropZone.addEventListener("dragover", (event) => {
+  event.preventDefault();                 // required, or the browser just opens the file
+  dropZone.classList.add("dragover");
+});
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", (event) => {
+  event.preventDefault();
+  dropZone.classList.remove("dragover");
+  classifyPhoto(event.dataTransfer.files[0]);
 });
 
 function showPrediction(data) {

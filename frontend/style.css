@@ -49,6 +49,27 @@ button {
   cursor: pointer;
 }
 
+/* Drop zone for the leaf photo. */
+#drop-zone {
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #666;
+  cursor: pointer;
+}
+#drop-zone:hover {
+  border-color: #2e7d32;
+}
+#drop-zone.dragover {
+  border-color: #2e7d32;
+  background: #e6f4ea;          /* light green while a file hovers over it */
+  color: #2e7d32;
+}
+#drop-zone p {
+  margin: 0;
+}
+
 #preview {
   display: block;
   max-width: 260px;

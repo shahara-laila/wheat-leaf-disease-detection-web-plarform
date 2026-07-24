@@ -13,7 +13,10 @@
 
   <section>
     <h2>1. Check a leaf photo</h2>
-    <input type="file" id="file-input" accept="image/*">
+    <div id="drop-zone">
+      <p>Drag a leaf photo here, or click to choose one</p>
+    </div>
+    <input type="file" id="file-input" accept="image/*" hidden>
     <img id="preview" alt="Selected leaf" hidden>
     <div id="predict-result"></div>
     <p class="note">

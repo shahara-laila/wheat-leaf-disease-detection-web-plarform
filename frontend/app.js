@@ -1,10 +1,10 @@
-// Web page for the wheat disease API. Plain JavaScript, no build step.
+
 
 const $ = (id) => document.getElementById(id);
 const pretty = (name) => name.replace(/_/g, " ");
 const percent = (value) => (value * 100).toFixed(1) + "%";
 
-// --- server status ---------------------------------------------------------
+
 
 async function showStatus() {
   try {
@@ -18,7 +18,6 @@ async function showStatus() {
   }
 }
 
-// --- 1. photo --------------------------------------------------------------
 
 // Both the file button and the drop zone end up calling this one function.
 async function classifyPhoto(file) {
@@ -49,12 +48,12 @@ async function classifyPhoto(file) {
   }
 }
 
-// The file button.
+
 $("file-input").addEventListener("change", (event) => {
   classifyPhoto(event.target.files[0]);
 });
 
-// Drag-and-drop onto the drop zone. Clicking it also opens the file picker.
+
 const dropZone = $("drop-zone");
 dropZone.addEventListener("click", () => $("file-input").click());
 dropZone.addEventListener("dragover", (event) => {
@@ -79,8 +78,7 @@ function showPrediction(data) {
       </div>`)
     .join("");
 
-  // Green when the leaf is healthy, amber when a disease is found. A low-confidence
-  // answer is always amber, whatever the class.
+
   const healthy = data.prediction === "Healthy" && !data.uncertain;
   const colour = healthy ? "good" : "alert";
 
@@ -102,7 +100,6 @@ function showPrediction(data) {
     <p>${data.recommendation}</p>`;
 }
 
-// --- 2. symptom search -----------------------------------------------------
 
 $("search-button").addEventListener("click", search);
 $("symptom-input").addEventListener("keydown", (event) => {
@@ -142,7 +139,6 @@ async function search() {
   }
 }
 
-// --- 3. disease list -------------------------------------------------------
 
 async function showDiseases() {
   try {

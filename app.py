@@ -1,12 +1,3 @@
-"""Wheat leaf disease detection - web API.
-
-Two features:
-  1. A photo of a leaf is classified by the trained CNN (Brown Rust, Healthy,
-     Yellow Rust).
-  2. Typed symptoms are matched against the disease list in diseases.json.
-
-Start the server with:  uvicorn app:app --reload
-"""
 
 import json
 import re
@@ -21,18 +12,15 @@ from pydantic import BaseModel
 
 ROOT = Path(__file__).parent
 
-# The CNN was trained on 256x256 RGB images with pixels scaled to 0-1, and its
-# three outputs come out in this order. Both must match the training notebook.
+
 IMAGE_SIZE = (256, 256)
 CLASS_NAMES = ["Brown_Rust", "Healthy", "Yellow_Rust"]
 
-# Below this confidence we warn the user instead of trusting the answer.
 CONFIDENCE_THRESHOLD = 0.70
 
 diseases = json.loads((ROOT / "diseases.json").read_text(encoding="utf-8"))
 
-# The model file is not in the repository (26 MB), so loading is allowed to
-# fail: the symptom search and the disease list work without it.
+
 try:
     from tensorflow import keras
 
@@ -49,23 +37,17 @@ class SymptomText(BaseModel):
 
 
 @app.get("/health")
-def health():
-    """Used by the web page to see whether the model is available."""
+def health():   
     return {"model_loaded": model is not None, "disease_count": len(diseases)}
 
 
 @app.get("/diseases")
 def list_diseases():
-    """The whole knowledge base: 13 diseases plus Healthy."""
     return diseases
 
 
 @app.post("/predict")
 async def predict(image: UploadFile = File(...)):
-    """Classify one leaf photo.
-
-    The upload is kept in memory only - it is never written to disk.
-    """
     if model is None:
         raise HTTPException(503, "The model is not loaded on the server.")
 
